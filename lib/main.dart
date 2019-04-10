@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(App());
@@ -61,10 +60,10 @@ class Home extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(8.0),
                   color: Color(0xffffffff),
-                  // image: DecorationImage(
-                  //   image: image,
-                  //   fit: BoxFit.cover,
-                  // ),
+                  image: DecorationImage(
+                    image: image,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             );
