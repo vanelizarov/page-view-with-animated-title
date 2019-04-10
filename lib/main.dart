@@ -1,111 +1,156 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/cupertino.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(App());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+final image = AssetImage('assets/city.jpg');
+
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+    return CupertinoApp(
+      home: Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class Home extends StatelessWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      // navigationBar: CupertinoNavigationBar(
+      //   middle: Text('Cards'),
+      //   backgroundColor: Color(0xffffffff),
+      // ),
+      child: SafeArea(
+        child: AnimatedTitlePageView(
+          pageCount: 3,
+          titleBuilder: (_, idx) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0).copyWith(bottom: 0.0),
+              child: Text(
+                'This is title of page $idx',
+                style: TextStyle(
+                  fontSize: 32.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
+          bodyBuilder: (_, idx) {
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: 16.0,
+                bottom: 30.0,
+                right: 16.0,
+                left: 16.0,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      offset: const Offset(0, 10.0),
+                      blurRadius: 20.0,
+                      color: Color.fromRGBO(0, 0, 0, .19),
+                    ),
+                    BoxShadow(
+                      offset: const Offset(0, 6.0),
+                      blurRadius: 6.0,
+                      color: Color.fromRGBO(0, 0, 0, .23),
+                    )
+                  ],
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Color(0xffffffff),
+                  // image: DecorationImage(
+                  //   image: image,
+                  //   fit: BoxFit.cover,
+                  // ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class AnimatedTitlePageView extends StatefulWidget {
+  AnimatedTitlePageView({
+    Key key,
+    @required this.titleBuilder,
+    @required this.bodyBuilder,
+    @required this.pageCount,
+  })  : assert(titleBuilder != null),
+        assert(bodyBuilder != null),
+        assert(pageCount != null),
+        super(key: key);
 
-  void _incrementCounter() {
+  final IndexedWidgetBuilder bodyBuilder;
+  final IndexedWidgetBuilder titleBuilder;
+  final int pageCount;
+
+  @override
+  _AnimatedTitlePageViewState createState() => _AnimatedTitlePageViewState();
+}
+
+double mapValue(double value, double low1, double high1, double low2, double high2) {
+  return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+}
+
+class _AnimatedTitlePageViewState extends State<AnimatedTitlePageView> {
+  final _controller = PageController(
+    // viewportFraction: 0.9,
+    initialPage: 0,
+  );
+  double _prevPage = 0.0;
+  double _offset = 0.0;
+
+  @override
+  void initState() {
+    _controller.addListener(_onScroll);
+    super.initState();
+  }
+
+  _onScroll() {
+    final off = (_prevPage - _controller.page).abs() * 100;
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _offset = off > 50.0 ? 50.0 : off;
     });
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+    return PageView.builder(
+      controller: _controller,
+      onPageChanged: (idx) => _prevPage = idx.toDouble(),
+      itemCount: widget.pageCount,
+      itemBuilder: (ctx, idx) {
+        final yOff = idx == _prevPage.toInt() ? _offset : 100.0 - _offset;
+        final opacity = idx == _prevPage.toInt() ? mapValue(_offset, 0.0, 50.0, 1.0, 0.0) : 1.0;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Transform.translate(
+              offset: Offset(0.0, yOff),
+              child: Opacity(
+                opacity: opacity,
+                child: widget.titleBuilder(ctx, idx),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
+            Expanded(
+              key: ValueKey('page_body_$idx'),
+              child: widget.bodyBuilder(ctx, idx),
+            )
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        );
+      },
     );
   }
 }
